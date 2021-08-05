@@ -1,0 +1,12 @@
+{
+  "twitch_client_id": "",
+  "twitch_secret_id": "",
+  "save_directory": "./data/",
+  "channels_chat": [
+    "sodapoppin",
+    "nmplol",
+    "pokelawls",
+    "moonmoon",
+    "sevadus"
+  ]
+}
