@@ -38,13 +38,13 @@ func main() {
 	<-waitForFirstAppAccessToken
 
 	// Ensure we have channels
-	if len(config.ChannelsChat) < 1 {
+	if len(config.ChannelsVideo) < 1 {
 		log.Fatalf("CONFIG: please specify at least one chat channel to watch\n")
 	}
 
 	// Get the user ids for this user
 	var usernameIds []string
-	for _, username := range config.ChannelsChat {
+	for _, username := range config.ChannelsVideo {
 		user := helix.User{}
 		err := errors.New("startup")
 		for err != nil {
@@ -65,7 +65,7 @@ func main() {
 		go func(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 			defer wg.Done()
 			for true {
-				threads.DownloadLiveChat(client, username, usernameId, config)
+				threads.DownloadLiveVideo(client, username, usernameId, config)
 				time.Sleep(5 * time.Minute)
 			}
 		}(client, config.ChannelsChat[i], usernameIds[i], config)

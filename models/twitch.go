@@ -49,3 +49,13 @@ type Comments struct {
 //	UserColor        string           `json:"user_color"`
 //	UserNoticeParams UserNoticeParams `json:"user_notice_params"`
 //}
+
+type GraphQLVideoPlaybackAccessResponse struct {
+	Data struct {
+		VideoPlaybackAccessToken struct {
+			Signature string `json:"signature"`
+			Value     string `json:"value"`
+		} `json:"videoPlaybackAccessToken"`
+	} `json:"data"`
+}
+

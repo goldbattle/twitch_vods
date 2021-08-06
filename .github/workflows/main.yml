@@ -25,12 +25,16 @@ jobs:
           fi
 
       - name: Build
-        run: go build -v .
+        run: |
+          go build twitch_chat_live.go
+          go build twitch_video_live.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
           name: twitch_vods_ubuntu.zip
-          path: twitch_vods
+          path: |
+            twitch_chat_live
+            twitch_video_live
 
 

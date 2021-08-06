@@ -2,11 +2,15 @@
   "twitch_client_id": "",
   "twitch_secret_id": "",
   "save_directory": "./data/",
+  "video_resolution": "1080p",
   "channels_chat": [
     "sodapoppin",
     "nmplol",
     "pokelawls",
     "moonmoon",
     "sevadus"
+  ],
+  "channels_video": [
+    "sodapoppin"
   ]
 }

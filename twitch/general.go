@@ -3,6 +3,7 @@ package twitch
 import (
 	"errors"
 	"github.com/nicklaw5/helix"
+	"log"
 )
 
 func GetUser(client *helix.Client, username string) (helix.User, error) {
@@ -24,10 +25,18 @@ func GetUser(client *helix.Client, username string) (helix.User, error) {
 func GetLatestStream(client *helix.Client, usernameId string) (helix.Stream, error) {
 
 	// Get the streams for this user
-	respStreams, err := client.GetStreams(&helix.StreamsParams{
-		UserIDs: []string{usernameId},
-		First:   5,
-	})
+	err := errors.New("startup")
+	respStreams := &helix.StreamsResponse{}
+	for i := 1; i < 5; i++ {
+		respStreams, err = client.GetStreams(&helix.StreamsParams{
+			UserIDs: []string{usernameId},
+			First:   5,
+		})
+		if err == nil {
+			break
+		}
+		log.Printf("ERROR: stream api call failed %s (try %d)\n", err, i)
+	}
 	if err != nil {
 		return helix.Stream{}, err
 	}
@@ -43,11 +52,20 @@ func GetLatestStream(client *helix.Client, usernameId string) (helix.Stream, err
 func GetLatestVodId(client *helix.Client, usernameId string) (helix.Video, error) {
 
 	// Get videos for this specific user
-	respVideos, err := client.GetVideos(&helix.VideosParams{
-		UserID: usernameId,
-		First:  1,
-		Sort:   "time",
-	})
+
+	err := errors.New("startup")
+	respVideos := &helix.VideosResponse{}
+	for i := 1; i < 5; i++ {
+		respVideos, err = client.GetVideos(&helix.VideosParams{
+			UserID: usernameId,
+			First:  1,
+			Sort:   "time",
+		})
+		if err == nil {
+			break
+		}
+		log.Printf("ERROR: vod api call failed %s (try %d)\n", err, i)
+	}
 	if err != nil {
 		return helix.Video{}, err
 	}

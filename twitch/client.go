@@ -17,7 +17,7 @@ func InitAppAccessToken(helixAPI *helix.Client, tokenFetched chan struct{}) {
 	for err != nil {
 		response, err = helixAPI.RequestAppAccessToken([]string{})
 		if err != nil {
-			log.Printf("HELIX: error requesting app access token: %s , \n %s", err.Error(), response.Error)
+			log.Printf("HELIX: error requesting app access token: %s", err)
 		}
 	}
 	log.Printf("HELIX: requested access token, status: %d, expires in: %d", response.StatusCode, response.Data.ExpiresIn)
@@ -25,7 +25,7 @@ func InitAppAccessToken(helixAPI *helix.Client, tokenFetched chan struct{}) {
 	close(tokenFetched)
 
 	// initialize the ticker
-	ticker := time.NewTicker(24 * time.Hour)
+	ticker := time.NewTicker(1 * time.Hour)
 	for range ticker.C {
 		response, err := helixAPI.RequestAppAccessToken([]string{})
 		if err != nil {

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func DownloadLiveChat(client *helix.Client, username string, usernameId string, folder string) {
+func DownloadLiveChat(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 
 	// Check if user live
 	stream, err := twitch.GetLatestStream(client, usernameId)
@@ -88,13 +88,13 @@ func DownloadLiveChat(client *helix.Client, username string, usernameId string, 
 			_, err = twitch.GetLatestStream(client, usernameId)
 			if err != nil {
 				log.Printf("CHAT: %s - stream is offline!!!!\n", username)
-				helpers.SaveChatToFile(folder, username, usernameId, vod, comments)
+				helpers.SaveChatToFile(config.SaveDirectory, username, usernameId, vod, comments)
 				break
 			} else {
 				// todo; should fail save and break out if waited too long here....
 				// todo; check if vod id is the same? or just if no new messages in 20 minutes, then break out?
 				log.Printf("CHAT: %s - stream is live, waiting a bit...\n", username)
-				helpers.SaveChatToFile(folder, username, usernameId, vod, comments)
+				helpers.SaveChatToFile(config.SaveDirectory, username, usernameId, vod, comments)
 				time.Sleep(4 * time.Minute)
 				isFirstFullDownload = false
 				continue
