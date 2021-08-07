@@ -4,6 +4,7 @@ import (
 	"../models"
 	"../twitch"
 	"encoding/json"
+	"fmt"
 	"github.com/grafov/m3u8"
 	"github.com/nicklaw5/helix"
 	"io"
@@ -11,7 +12,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func DownloadLiveVideo(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
@@ -126,8 +129,12 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 	segmentPlaylist := playlist.(*m3u8.MediaPlaylist)
 	log.Printf("VIDEO: %s - found %d video segments", username, len(segmentPlaylist.Segments))
 
+	// Parse VOD date
+	tm, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
+
 	// Create file / folders if needed to save into
-	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), vod.ID+"_live")
+	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), yearFolder, vod.ID+"_live")
 	err = os.MkdirAll(saveDir, os.ModePerm)
 	if err != nil {
 		log.Printf("VIDEO: %s - error %s", username, err)
@@ -177,13 +184,13 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 
 		// Create local file and write to it
 		out, err := os.Create(saveFile)
-		if err != nil  {
+		if err != nil {
 			log.Printf("VIDEO: %s - error %s", username, err)
 			continue
 		}
 		defer out.Close()
 		_, err = io.Copy(out, resp.Body)
-		if err != nil  {
+		if err != nil {
 			log.Printf("VIDEO: %s - error %s", username, err)
 			continue
 		}

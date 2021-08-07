@@ -3,6 +3,7 @@ package helpers
 import (
 	"../models"
 	"encoding/json"
+	"fmt"
 	"github.com/nicklaw5/helix"
 	"io/ioutil"
 	"log"
@@ -11,12 +12,17 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func SaveChatToFile(folder string, username string, usernameId string, vod helix.Video, comments []models.Comments) {
 
+	// Parse VOD date
+	tm, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
+
 	// Create file / folders if needed to save into
-	saveDir := filepath.Join(folder, strings.ToLower(username))
+	saveDir := filepath.Join(folder, strings.ToLower(username), yearFolder)
 	saveFile := filepath.Join(saveDir, vod.ID+"_live_chat.json")
 	err := os.MkdirAll(saveDir, os.ModePerm)
 	if err != nil {
