@@ -25,7 +25,7 @@ func CallGraphQl(url string, jsonPayload map[string]string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return []byte(""), errors.New("invalid response code: "+strconv.Itoa(resp.StatusCode))
+		return []byte(""), errors.New("invalid response code: " + strconv.Itoa(resp.StatusCode))
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -33,8 +33,3 @@ func CallGraphQl(url string, jsonPayload map[string]string) ([]byte, error) {
 	}
 	return body, nil
 }
-
-
-
-
-

@@ -58,4 +58,3 @@ type GraphQLVideoPlaybackAccessResponse struct {
 		} `json:"videoPlaybackAccessToken"`
 	} `json:"data"`
 }
-

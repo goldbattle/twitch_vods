@@ -52,7 +52,6 @@ func GetLatestStream(client *helix.Client, usernameId string) (helix.Stream, err
 func GetLatestVodId(client *helix.Client, usernameId string) (helix.Video, error) {
 
 	// Get videos for this specific user
-
 	err := errors.New("startup")
 	respVideos := &helix.VideosResponse{}
 	for i := 1; i < 5; i++ {
@@ -76,5 +75,42 @@ func GetLatestVodId(client *helix.Client, usernameId string) (helix.Video, error
 	//	fmt.Printf("%s - %s - %s\n", video.CreatedAt, video.ID, video.Title)
 	//}
 	return respVideos.Data.Videos[0], nil
+
+}
+
+func GetLatestVods(client *helix.Client, usernameId string, count int) ([]helix.Video, error) {
+
+	// Return if no vods requested
+	if count < 1 {
+		return []helix.Video{}, errors.New("select non-zero vod count")
+	}
+	if count > 100 {
+		return []helix.Video{}, errors.New("do not request more then 100 vods")
+	}
+
+	// Get videos for this specific user
+	err := errors.New("startup")
+	respVideos := &helix.VideosResponse{}
+	for i := 1; i < 5; i++ {
+		respVideos, err = client.GetVideos(&helix.VideosParams{
+			UserID: usernameId,
+			First:  count,
+			Sort:   "time",
+		})
+		if err == nil {
+			break
+		}
+		log.Printf("ERROR: vod api call failed %s (try %d)\n", err, i)
+	}
+	if err != nil {
+		return []helix.Video{}, err
+	}
+	if len(respVideos.Data.Videos) < 1 {
+		return []helix.Video{}, errors.New("no vod returned")
+	}
+	//for _, video := range respVideos.Data.Videos {
+	//	fmt.Printf("%s - %s - %s\n", video.CreatedAt, video.ID, video.Title)
+	//}
+	return respVideos.Data.Videos, nil
 
 }

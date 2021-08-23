@@ -1,9 +1,9 @@
 package main
 
 import (
+	"./algos"
 	"./helpers"
 	"./models"
-	"./threads"
 	"./twitch"
 	"errors"
 	"github.com/nicklaw5/helix"
@@ -65,8 +65,8 @@ func main() {
 		go func(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 			defer wg.Done()
 			for true {
-				threads.DownloadLiveChat(client, username, usernameId, config)
-				time.Sleep(5 * time.Minute)
+				algos.DownloadChatLatest(client, username, usernameId, config)
+				time.Sleep(time.Duration(config.QueryVodsMin) * time.Minute)
 			}
 		}(client, config.ChannelsChat[i], usernameIds[i], config)
 	}

@@ -5,6 +5,10 @@ type ConfigurationFile struct {
 	TwitchSecretId  string   `json:"twitch_secret_id"`
 	SaveDirectory   string   `json:"save_directory"`
 	VideoResolution string   `json:"video_resolution"`
+	DownloadNum     int      `json:"download_num"`
+	SkipIfOlderMin  int      `json:"skip_if_older_min"`
 	ChannelsChat    []string `json:"channels_chat"`
 	ChannelsVideo   []string `json:"channels_video"`
+	QueryVodsMin    int      `json:"query_vods_min"`
+	QueryLiveMin    int      `json:"query_live_min"`
 }

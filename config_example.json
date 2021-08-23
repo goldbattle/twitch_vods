@@ -3,6 +3,8 @@
   "twitch_secret_id": "",
   "save_directory": "./data/",
   "video_resolution": "1080p",
+  "download_num": 4,
+  "skip_if_older_min": 15,
   "channels_chat": [
     "sodapoppin",
     "nmplol",
@@ -12,5 +14,7 @@
   ],
   "channels_video": [
     "sodapoppin"
-  ]
+  ],
+  "query_vods_min": 15,
+  "query_live_min": 1
 }

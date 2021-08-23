@@ -1,5 +1,5 @@
 name: build
-on: [push]
+on: [ push ]
 jobs:
 
   build:
@@ -26,15 +26,16 @@ jobs:
 
       - name: Build
         run: |
-          go build twitch_chat_live.go
-          go build twitch_video_live.go
+          go build twitch_download_chat.go
+          go build twitch_download_vod.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
           name: twitch_vods_ubuntu.zip
           path: |
-            twitch_chat_live
-            twitch_video_live
+            config_example.json
+            twitch_download_chat
+            twitch_download_vod
 
 

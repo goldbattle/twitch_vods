@@ -15,6 +15,22 @@ import (
 	"time"
 )
 
+func IsChatDownloaded(folder string, username string, usernameId string, vod helix.Video) bool {
+
+	// Parse VOD date
+	tm, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
+
+	// Check if our file exists
+	saveDir := filepath.Join(folder, strings.ToLower(username), yearFolder)
+	saveFile := filepath.Join(saveDir, vod.ID+"_chat.json")
+	if _, err := os.Stat(saveFile); err == nil {
+		return true
+	}
+	return false
+
+}
+
 func SaveChatToFile(folder string, username string, usernameId string, vod helix.Video, comments []models.Comments) {
 
 	// Parse VOD date
@@ -23,7 +39,7 @@ func SaveChatToFile(folder string, username string, usernameId string, vod helix
 
 	// Create file / folders if needed to save into
 	saveDir := filepath.Join(folder, strings.ToLower(username), yearFolder)
-	saveFile := filepath.Join(saveDir, vod.ID+"_live_chat.json")
+	saveFile := filepath.Join(saveDir, vod.ID+"_chat.json")
 	err := os.MkdirAll(saveDir, os.ModePerm)
 	if err != nil {
 		log.Printf("CHAT: error %s", err)

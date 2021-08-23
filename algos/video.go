@@ -1,4 +1,4 @@
-package threads
+package algos
 
 import (
 	"../models"
@@ -17,27 +17,26 @@ import (
 	"time"
 )
 
-func DownloadLiveVideo(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
+func DownloadVodLatest(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 
-	// Check if user live
-	stream, err := twitch.GetLatestStream(client, usernameId)
+	// Get our VODs
+	vods, err := twitch.GetLatestVods(client, usernameId, config.DownloadNum)
 	if err != nil {
 		log.Printf("VIDEO: %s - error %s\n", username, err)
 		return
 	}
-	log.Printf("VIDEO: %s - %s -> %s\n", username, stream.StartedAt, stream.Title)
 
-	// Get our VOD
-	vod, err := twitch.GetLatestVodId(client, usernameId)
-	if err != nil {
-		log.Printf("VIDEO: %s - error %s\n", username, err)
-		return
+	// For each vod lets download it
+	for ct, vod := range vods {
+		log.Printf("VIDEO: %s - vod id %s downloading (%d/%d)\n", username, vod.ID, ct, config.DownloadNum)
+		DownloadVod(client, username, usernameId, config, vod)
 	}
-	log.Printf("VIDEO: %s - vod id %s found\n", username, vod.ID)
 
-	// ================================================
-	// ================================================
+}
 
+func DownloadVod(client *helix.Client, username string, usernameId string, config models.ConfigurationFile, vod helix.Video) {
+
+	// Query twitch to get our request signature for m3u8 files
 	jsonPayload := map[string]string{
 		"query": `
             {
@@ -61,9 +60,6 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 		log.Printf("VIDEO: %s - error api response is bad %s\n", username, err)
 		return
 	}
-
-	// ================================================
-	// ================================================
 
 	// Call our api endpoint
 	baseUrl := "http://usher.twitch.tv/vod/" + vod.ID
@@ -101,12 +97,9 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 		log.Printf("VIDEO: %s - unable to find requested %s res in vod playlist\n", username, config.VideoResolution)
 		return
 	}
-	log.Printf("VIDEO: %s - resolution = %s\n", username, masterPlaylist.Variants[indexVideo].Resolution)
-	log.Printf("VIDEO: %s - url = %s\n", username, masterPlaylist.Variants[indexVideo].URI)
+	//log.Printf("VIDEO: %s - resolution = %s\n", username, masterPlaylist.Variants[indexVideo].Resolution)
+	//log.Printf("VIDEO: %s - url = %s\n", username, masterPlaylist.Variants[indexVideo].URI)
 	masterPlaylistUri := masterPlaylist.Variants[indexVideo].URI
-
-	// ================================================
-	// ================================================
 
 	// Call our api endpoint
 	res, err = http.Get(masterPlaylistUri)
@@ -134,7 +127,7 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
 
 	// Create file / folders if needed to save into
-	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), yearFolder, vod.ID+"_live")
+	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), yearFolder, vod.ID)
 	err = os.MkdirAll(saveDir, os.ModePerm)
 	if err != nil {
 		log.Printf("VIDEO: %s - error %s", username, err)
@@ -162,10 +155,18 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 			continue
 		}
 
-		// Skip if file exists
+		// Check the file segment on disk
+		// Also use this to check if the file exists
 		saveFile := filepath.Join(saveDir, segment.URI)
-		if _, err := os.Stat(saveFile); err == nil {
+		fi, err := os.Stat(saveFile)
+
+		// Skip if file exists and has data
+		if err == nil && fi.Size() > 0 {
 			continue
+		}
+		if err == nil && fi.Size() <= 0 {
+			log.Printf("VIDEO: deleting bad file %s", segment.URI)
+			_ = os.Remove(saveFile)
 		}
 		log.Printf("VIDEO: %s - downloading %s (%d / %d)", username, segment.URI, idx, countTotalSegments)
 
@@ -199,5 +200,7 @@ func DownloadLiveVideo(client *helix.Client, username string, usernameId string,
 
 	/// Done :)
 	log.Printf("VIDEO: %s - done downloading video segments!!!", username)
+
+	// Loop through and remove any invalid segments
 
 }
