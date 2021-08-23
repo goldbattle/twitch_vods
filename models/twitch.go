@@ -71,4 +71,3 @@ type GraphQLStreamPlaybackAccessResponse struct {
 		RequestID            string `json:"requestID"`
 	} `json:"extensions"`
 }
-

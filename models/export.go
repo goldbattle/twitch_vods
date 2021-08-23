@@ -40,4 +40,3 @@ type Firstparty struct {
 type MappingStreamToVod struct {
 	Data map[string]helix.Video `json:"data"`
 }
-

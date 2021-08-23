@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-
 func GetVodFromStreamId(client *helix.Client, username string, usernameId string, config models.ConfigurationFile, stream helix.Stream) (helix.Video, error) {
 
 	// Try to load from file
@@ -65,4 +64,3 @@ func GetVodFromStreamId(client *helix.Client, username string, usernameId string
 	return helix.Video{}, errors.New("unable to find vod id for stream id")
 
 }
-
