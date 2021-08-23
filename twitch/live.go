@@ -17,7 +17,7 @@ func GetVodFromStreamId(client *helix.Client, username string, usernameId string
 	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username))
 	saveFile := filepath.Join(saveDir, "mapping_stream2vod.json")
 	data := &models.MappingStreamToVod{}
-	if _, err := os.Stat(saveDir); err == nil {
+	if _, err := os.Stat(saveFile); err == nil {
 		file, err := ioutil.ReadFile(saveFile)
 		if err != nil {
 			return helix.Video{}, errors.New("error loading mapping file")
