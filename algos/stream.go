@@ -43,7 +43,7 @@ func DownloadStreamLive(client *helix.Client, username string, usernameId string
 	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
 
 	// Create file / folders if needed to save into
-	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), yearFolder, vod.ID)
+	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), yearFolder, vod.ID+"_live")
 	err = os.MkdirAll(saveDir, os.ModePerm)
 	if err != nil {
 		log.Printf("LIVE: %s - error %s", username, err)
