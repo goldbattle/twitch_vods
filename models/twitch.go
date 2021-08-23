@@ -58,3 +58,17 @@ type GraphQLVideoPlaybackAccessResponse struct {
 		} `json:"videoPlaybackAccessToken"`
 	} `json:"data"`
 }
+
+type GraphQLStreamPlaybackAccessResponse struct {
+	Data struct {
+		StreamPlaybackAccessToken struct {
+			Signature string `json:"signature"`
+			Value     string `json:"value"`
+		} `json:"streamPlaybackAccessToken"`
+	} `json:"data"`
+	Extensions struct {
+		DurationMilliseconds int    `json:"durationMilliseconds"`
+		RequestID            string `json:"requestID"`
+	} `json:"extensions"`
+}
+

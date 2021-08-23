@@ -66,3 +66,19 @@ func SaveChatToFile(folder string, username string, usernameId string, vod helix
 	_ = ioutil.WriteFile(saveFile, file, 0644)
 
 }
+
+func IsVodDownloaded(folder string, username string, usernameId string, vod helix.Video) bool {
+
+	// Parse VOD date
+	tm, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
+
+	// Check if our file exists
+	saveDir := filepath.Join(folder, strings.ToLower(username), yearFolder, vod.ID)
+	if _, err := os.Stat(saveDir); err == nil {
+		return true
+	}
+	return false
+
+}
+

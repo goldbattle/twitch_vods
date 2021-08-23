@@ -9,6 +9,7 @@ type ConfigurationFile struct {
 	SkipIfOlderMin  int      `json:"skip_if_older_min"`
 	ChannelsChat    []string `json:"channels_chat"`
 	ChannelsVideo   []string `json:"channels_video"`
+	ChannelsLive    []string `json:"channels_live"`
 	QueryVodsMin    int      `json:"query_vods_min"`
 	QueryLiveMin    int      `json:"query_live_min"`
 }

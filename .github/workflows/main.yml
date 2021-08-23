@@ -28,6 +28,7 @@ jobs:
         run: |
           go build twitch_download_chat.go
           go build twitch_download_vod.go
+          go build twitch_live_stream.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2.2.4
@@ -37,5 +38,6 @@ jobs:
             config_example.json
             twitch_download_chat
             twitch_download_vod
+            twitch_live_stream
 
 

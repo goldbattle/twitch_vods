@@ -15,6 +15,9 @@
   "channels_video": [
     "sodapoppin"
   ],
+  "channels_live": [
+    "sodapoppin"
+  ],
   "query_vods_min": 15,
   "query_live_min": 1
 }

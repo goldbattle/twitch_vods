@@ -1,5 +1,7 @@
 package models
 
+import "github.com/nicklaw5/helix"
+
 type ChatRenderStructure struct {
 	Streamer Streamer   `json:"streamer"`
 	Comments []Comments `json:"comments"`
@@ -34,3 +36,8 @@ type Firstparty struct {
 	Imagescale int    `json:"imageScale"`
 	Data       string `json:"data"`
 }
+
+type MappingStreamToVod struct {
+	Data map[string]helix.Video `json:"data"`
+}
+

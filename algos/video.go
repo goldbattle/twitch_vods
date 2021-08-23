@@ -1,6 +1,7 @@
 package algos
 
 import (
+	"../helpers"
 	"../models"
 	"../twitch"
 	"encoding/json"
@@ -35,6 +36,19 @@ func DownloadVodLatest(client *helix.Client, username string, usernameId string,
 }
 
 func DownloadVod(client *helix.Client, username string, usernameId string, config models.ConfigurationFile, vod helix.Video) {
+
+	// Skip if already downloaded
+	// NOTE: We will still try to download recent vods (to make sure we get everything)
+	// NOTE: Thus we will add the start time to the duration to get the time the vod ends
+	// NOTE: We can then compare that to our current time (UTC) and see if it could have been recently updated
+	tm0 := time.Now().UTC()
+	tm1, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	tm1Dur, _ := time.ParseDuration(vod.Duration)
+	diff := tm0.Sub(tm1.Add(tm1Dur))
+	if helpers.IsVodDownloaded(config.SaveDirectory, username, usernameId, vod) && int(diff.Minutes()) > config.SkipIfOlderMin {
+		log.Printf("VIDEO: %s - vod %s, skipping (updated %d min ago)\n", username, vod.ID, int(diff.Minutes()))
+		return
+	}
 
 	// Query twitch to get our request signature for m3u8 files
 	jsonPayload := map[string]string{
@@ -200,7 +214,5 @@ func DownloadVod(client *helix.Client, username string, usernameId string, confi
 
 	/// Done :)
 	log.Printf("VIDEO: %s - done downloading video segments!!!", username)
-
-	// Loop through and remove any invalid segments
 
 }
