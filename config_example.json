@@ -2,6 +2,7 @@
   "twitch_client_id": "",
   "twitch_secret_id": "",
   "save_directory": "./data/",
+  "streamlink": "streamlink.exe",
   "video_resolution": "1080p",
   "download_num": 4,
   "skip_if_older_min": 15,

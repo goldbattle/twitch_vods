@@ -65,7 +65,8 @@ func main() {
 		go func(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 			defer wg.Done()
 			for true {
-				algos.DownloadStreamLive(client, username, usernameId, config)
+				//algos.DownloadStreamLive(client, username, usernameId, config)
+				algos.DownloadStreamLiveStreamLink(client, username, usernameId, config)
 				time.Sleep(time.Duration(config.QueryLiveMin) * time.Minute)
 			}
 		}(client, config.ChannelsLive[i], usernameIds[i], config)

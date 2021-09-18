@@ -14,6 +14,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -258,5 +259,67 @@ func DownloadStreamLive(client *helix.Client, username string, usernameId string
 		//log.Printf("LIVE: %s - done downloading video segments!!!", username)
 		time.Sleep(15 * time.Second)
 	}
+
+}
+
+func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
+
+	// Check if we have a stream that is live
+	stream, err := twitch.GetLatestStream(client, usernameId)
+	if err != nil {
+		log.Printf("LIVE: %s - error %s\n", username, err)
+		return
+	}
+
+	// Convert the stream id to the vod id that we will save into
+	vod, err := twitch.GetVodFromStreamId(client, username, usernameId, config, stream)
+	if err != nil {
+		log.Printf("LIVE: %s - error %s\n", username, err)
+		return
+	}
+	log.Printf("LIVE: %s - stream id = %s", username, stream.ID)
+	log.Printf("LIVE: %s - vod id = %s", username, vod.ID)
+
+	// Parse VOD date
+	tm, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
+
+	// Create file / folders if needed to save into
+	saveDir := filepath.Join(config.SaveDirectory, strings.ToLower(username), yearFolder)
+	err = os.MkdirAll(saveDir, os.ModePerm)
+	if err != nil {
+		log.Printf("LIVE: %s - error %s", username, err)
+		return
+	}
+
+	// Create export log file
+	pathVideo := filepath.Join(saveDir, vod.ID+"_streamlink.mp4")
+	pathLog := filepath.Join(saveDir, vod.ID+"_streamlink.log")
+	logfile, err := os.Create(pathLog)
+	if err != nil {
+		log.Printf("LIVE: %s - error %s\n", username, err)
+		return
+	}
+	defer logfile.Close()
+	logfileWriter := bufio.NewWriter(logfile)
+	defer logfileWriter.Flush()
+	log.Printf("LIVE: %s - %s\n", username, pathVideo)
+
+	// Open our streamlink!
+	cmd := exec.Command(config.Streamlink, "twitch.tv/"+username, "best", "--loglevel",
+		"debug", "-o", pathVideo, "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns")
+	cmd.Stdout = logfileWriter
+	cmd.Stdout = logfileWriter
+	err = cmd.Start()
+	if err != nil {
+		log.Printf("LIVE: %s - error %s\n", username, err)
+		return
+	}
+	err = cmd.Wait()
+	if err != nil {
+		log.Printf("LIVE: %s - error %s\n", username, err)
+		return
+	}
+	log.Printf("LIVE: %s - stream has ended...\n", username)
 
 }
