@@ -9,7 +9,9 @@ import (
 	"github.com/nicklaw5/helix"
 	"log"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -58,16 +60,28 @@ func main() {
 		usernameIds = append(usernameIds, user.ID)
 	}
 
+	// Create a listener for the sigterm to close our threads
+	// https://gist.github.com/uudashr/3cf820e3ba902d3c6387abc82c815e66
+	gracefullSigterm := false
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		<-c
+		gracefullSigterm = true
+	}()
+
 	// Start group
 	var wg sync.WaitGroup
 	for i := range usernameIds {
 		wg.Add(1)
 		go func(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 			defer wg.Done()
-			for true {
+			for !gracefullSigterm {
 				//algos.DownloadStreamLive(client, username, usernameId, config)
 				algos.DownloadStreamLiveStreamLink(client, username, usernameId, config)
-				time.Sleep(time.Duration(config.QueryLiveMin) * time.Minute)
+				if !gracefullSigterm {
+					time.Sleep(time.Duration(config.QueryLiveMin) * time.Minute)
+				}
 			}
 		}(client, config.ChannelsLive[i], usernameIds[i], config)
 	}
