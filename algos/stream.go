@@ -511,7 +511,6 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 			}
 			// append the current string
 			fragCurrent.Text += string(ch)
-
 		}
 		comment.Message.Fragments = append(comment.Message.Fragments, fragCurrent)
 
