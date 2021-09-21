@@ -85,8 +85,8 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 	// Loop through and try to create a valid
 	fileCounter := 0
 	filePrefix := vod.ID + "_" + fmt.Sprintf("%03d", fileCounter)
-	pathVideo := filepath.Join(saveDir, filePrefix+"_streamlink.mp4")
-	pathVideoTmp := filepath.Join(saveDir, filePrefix+"_streamlink.tmp.mp4")
+	pathVideo := filepath.Join(saveDir, filePrefix+".mp4")
+	pathVideoTmp := filepath.Join(saveDir, filePrefix+".tmp.mp4")
 	for true {
 		_, err1 := os.Stat(pathVideo)
 		_, err2 := os.Stat(pathVideoTmp)
@@ -95,8 +95,8 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 		}
 		fileCounter++
 		filePrefix = vod.ID + "_" + fmt.Sprintf("%03d", fileCounter)
-		pathVideo = filepath.Join(saveDir, filePrefix+"_streamlink.mp4")
-		pathVideoTmp = filepath.Join(saveDir, filePrefix+"_streamlink.tmp.mp4")
+		pathVideo = filepath.Join(saveDir, filePrefix+".mp4")
+		pathVideoTmp = filepath.Join(saveDir, filePrefix+".tmp.mp4")
 	}
 	//pathVideo, _ = filepath.Abs(pathVideo)
 	//pathVideoTmp, _ = filepath.Abs(pathVideoTmp)
@@ -120,7 +120,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 
 	// Chat file writer
 	pathIrcChat := filepath.Join(saveDir, filePrefix+"_irc.log")
-	pathIrcChatJson := filepath.Join(saveDir, filePrefix+"_irc.json")
+	pathIrcChatJson := filepath.Join(saveDir, filePrefix+"_chat.json")
 	fileIrc, err := os.Create(pathIrcChat)
 	if err != nil {
 		log.Printf("LIVE: %s - error %s\n", username, err)
@@ -405,7 +405,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 					log.Println(currentMomentTitle)
 				}
 				metaData.Views = int(math.Max(float64(metaData.Views), float64(stream.ViewerCount)))
-				metaData.Duration = time.Since(time.Now()).String()
+				metaData.Duration = time.Since(ircStartTime).String()
 				if doSave {
 					file, _ = json.MarshalIndent(metaData, "", " ")
 					_ = ioutil.WriteFile(pathInfoJson, file, 0644)
