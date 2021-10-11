@@ -35,7 +35,7 @@ type Message struct {
 	IsAction         bool              `json:"is_action"`
 	UserBadges       []UserBadge       `json:"user_badges"`
 	UserColor        *string           `json:"user_color"`
-	UserNoticeParams *UserNoticeParams `json:"user_notice_params"`
+	UserNoticeParams UserNoticeParams `json:"user_notice_params"`
 	Emoticons        []Emoticon        `json:"emoticons"`
 }
 
@@ -44,7 +44,7 @@ type Fragment struct {
 	Emoticon *EmoticonFragment `json:"emoticon"`
 }
 type UserNoticeParams struct {
-	MsgId string `json:"msg-id"`
+	MsgId *string `json:"msg-id"`
 }
 
 type EmoticonFragment struct {

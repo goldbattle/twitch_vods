@@ -255,7 +255,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 		if len(message.User.Color) > 0 {
 			comment.Message.UserColor = &message.User.Color
 		}
-		comment.Message.UserNoticeParams = &models.UserNoticeParams{MsgId: message.MsgID}
+		comment.Message.UserNoticeParams = models.UserNoticeParams{MsgId: &message.MsgID}
 
 		// Loop through all user badges (sub, mod, etc..)
 		for id, ver := range message.User.Badges {
