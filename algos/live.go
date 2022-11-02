@@ -24,36 +24,48 @@ import (
 
 func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
 
+	// Our data structures
+	stream := helix.Stream{}
+	vod := helix.Video{}
+
 	// Check if we have a stream that is live
+	//err1 := twitch.TestIfStreamIsLiveM3U8(username)
 	stream, err := twitch.GetLatestStream(client, usernameId)
 	if err != nil {
-		log.Printf("LIVE: %s - error %s\n", username, err)
+		log.Printf("LIVE: %s - %s | %s\n", username, err)
 		return
 	}
 
 	// Convert the stream id to the vod id that we will save into
-	vod, err := twitch.GetVodFromStreamId(client, username, usernameId, config, stream)
-	if err != nil {
-		log.Printf("LIVE: %s - error %s\n", username, err)
-		return
+	vod, errVod := twitch.GetVodFromStreamId(client, username, usernameId, config, stream)
+	if errVod == nil {
+		log.Printf("LIVE: %s - stream id = %s | vod id = %s", username, stream.ID, vod.ID)
+	} else {
+		log.Printf("LIVE: %s - stream id = %s | vod id = unknown", username, stream.ID)
 	}
-	log.Printf("LIVE: %s - stream id = %s", username, stream.ID)
-	log.Printf("LIVE: %s - vod id = %s", username, vod.ID)
 
 	// VOD metadata
 	metaData := models.StreamMetaData{}
-	metaData.Id = vod.ID
+	if errVod == nil {
+		metaData.Id = vod.ID
+		metaData.Url = "https://www.twitch.tv/videos/" + vod.ID
+	}
 	metaData.IdStream = stream.ID
 	metaData.UserId = stream.UserID
 	metaData.UserName = stream.UserName
 	metaData.Title = stream.Title
 	metaData.Game = stream.GameName
-	metaData.Url = "https://www.twitch.tv/videos/" + vod.ID
 	metaData.Views = -1
 	metaData.RecordedAt = stream.StartedAt
 	metaData.Titles = make([]models.Moment, 0)
 	metaData.Moments = make([]models.Moment, 0)
 	metaData.MutedSegments = make([]interface{}, 0)
+
+	// Master id we will use
+	ID := stream.ID
+	if errVod == nil {
+		ID = vod.ID
+	}
 
 	// Create the current moments
 	currentMomentGameTime := time.Now()
@@ -71,7 +83,10 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 	currentMomentTitle.Type = "TITLE_CHANGE"
 
 	// Parse VOD date
-	tm, _ := time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	tm := stream.StartedAt
+	if errVod == nil {
+		tm, _ = time.Parse("2006-01-02T15:04:05Z", vod.CreatedAt)
+	}
 	yearFolder := strconv.Itoa(tm.Year()) + "-" + fmt.Sprintf("%02d", int(tm.Month()))
 
 	// Create file / folders if needed to save into
@@ -84,7 +99,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 
 	// Loop through and try to create a valid
 	fileCounter := 0
-	filePrefix := vod.ID + "_" + fmt.Sprintf("%03d", fileCounter)
+	filePrefix := ID + "_" + fmt.Sprintf("%03d", fileCounter)
 	pathVideo := filepath.Join(saveDir, filePrefix+".mp4")
 	pathVideoTmp := filepath.Join(saveDir, filePrefix+".tmp.mp4")
 	for true {
@@ -94,7 +109,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 			break
 		}
 		fileCounter++
-		filePrefix = vod.ID + "_" + fmt.Sprintf("%03d", fileCounter)
+		filePrefix = ID + "_" + fmt.Sprintf("%03d", fileCounter)
 		pathVideo = filepath.Join(saveDir, filePrefix+".mp4")
 		pathVideoTmp = filepath.Join(saveDir, filePrefix+".tmp.mp4")
 	}
@@ -145,7 +160,9 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 		comment.UpdatedAt = message.Time
 		comment.ChannelId = message.RoomID
 		comment.ContentType = "video"
-		comment.ContentId = vod.ID
+		if errVod == nil {
+			comment.ContentId = vod.ID
+		}
 		comment.ContentOffsetSeconds = time.Since(ircStartTime).Seconds()
 		comment.Commenter.DisplayName = message.User.DisplayName
 		comment.Commenter.Id = message.User.ID
@@ -240,7 +257,9 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 		comment.UpdatedAt = message.Time
 		comment.ChannelId = message.RoomID
 		comment.ContentType = "video"
-		comment.ContentId = vod.ID
+		if errVod == nil {
+			comment.ContentId = vod.ID
+		}
 		comment.ContentOffsetSeconds = time.Since(ircStartTime).Seconds()
 		comment.Commenter.DisplayName = message.User.DisplayName
 		comment.Commenter.Id = message.User.ID
@@ -361,7 +380,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
-		log.Printf("LIVE: %s - stream ended reqested!\n", username)
+		//log.Printf("LIVE: %s - stream ended reqested!\n", username)
 		_ = cmd.Process.Kill()
 		gracefullSigterm = true
 	}()
@@ -443,23 +462,23 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 	file, _ = json.MarshalIndent(metaData, "", " ")
 	_ = ioutil.WriteFile(pathInfoJson, file, 0644)
 
-
 	// ffmpeg clean the video file
-	//timeConversion := time.Now()
-	//cmd = exec.Command(config.Ffmpeg, "-err_detect ignore_err", "-i", pathVideoTmp, "-c copy", pathVideo)
+	timeConversion := time.Now()
+	cmd = exec.Command(config.Ffmpeg, "-err_detect", "ignore_err", "-i", pathVideoTmp, "-c", "copy", pathVideo)
 	//log.Println(cmd)
-	//cmd.Stdout = os.Stdout
-	//cmd.Stdout = os.Stdout
-	//err = cmd.Start()
-	//if err != nil {
-	//	log.Printf("LIVE: %s - error2  %s\n", username, err)
-	//	return
-	//}
-	//err = cmd.Wait()
-	//if err != nil {
-	//	log.Printf("LIVE: %s - error3 %s\n", username, err)
-	//	return
-	//}
-	//log.Printf("LIVE: %s - done converting stream (%s)!\n", username, time.Since(timeConversion).String())
+	cmd.Stdout = os.Stdout
+	cmd.Stdout = os.Stdout
+	err = cmd.Start()
+	if err != nil {
+		log.Printf("LIVE: %s - ffmpeg start error %s\n", username, err)
+		return
+	}
+	err = cmd.Wait()
+	if err != nil {
+		log.Printf("LIVE: %s - ffmpeg error %s\n", username, err)
+		return
+	}
+	log.Printf("LIVE: %s - ffpmeg converted stream in %s!\n", username, time.Since(timeConversion).String())
+	os.Remove(pathVideoTmp)
 
 }

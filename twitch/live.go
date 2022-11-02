@@ -4,10 +4,15 @@ import (
 	"../models"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/grafov/m3u8"
 	"github.com/nicklaw5/helix"
 	"io/ioutil"
+	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -62,5 +67,68 @@ func GetVodFromStreamId(client *helix.Client, username string, usernameId string
 		return val, nil
 	}
 	return helix.Video{}, errors.New("unable to find vod id for stream id")
+
+}
+
+func TestIfStreamIsLiveM3U8(username string) error {
+
+	// Now lets try to get the video
+	// Query twitch to get our request signature for m3u8 files
+	jsonPayload := map[string]string{
+		"query": `
+           {
+			  streamPlaybackAccessToken(channelName: "` + strings.ToLower(username) + `", params: {platform: "web", playerBackend: "mediaplayer", playerType: "site"}) {
+				signature
+				value
+			  }
+			}
+       `,
+	}
+	body, err := CallGraphQl("https://gql.twitch.tv/gql", jsonPayload)
+	if err != nil {
+		return err
+	}
+
+	// Convert to the api response
+	apiResponse := models.GraphQLStreamPlaybackAccessResponse{}
+	err = json.Unmarshal(body, &apiResponse)
+	if err != nil {
+		return errors.New("error decoding GQL api endpoint")
+	}
+
+	// Call our api endpoint to get the playlist
+	baseUrl := "http://usher.twitch.tv/api/channel/hls/" + strings.ToLower(username) + ".m3u8"
+	baseUrl += "?sig=" + apiResponse.Data.StreamPlaybackAccessToken.Signature
+	baseUrl += "&token=" + apiResponse.Data.StreamPlaybackAccessToken.Value
+	baseUrl += "&p=" + strconv.Itoa(rand.Intn(999999))
+	baseUrl += "&player=twitchweb&type=any&allow_source=true&playlist_include_framerate=true"
+	res, err := http.Get(baseUrl)
+	if err != nil {
+		return errors.New("error requesting playlist file")
+	}
+	defer res.Body.Close()
+
+	// Return if not success
+	if res.StatusCode != 200 {
+		return fmt.Errorf("got status code %d instead of 200", res.StatusCode)
+	}
+
+	// Parse the m3u8 playlist
+	playlist, listType, err := m3u8.DecodeFrom(res.Body, false)
+	if err != nil {
+		return errors.New("error decoding m3u8 live file")
+	}
+	if listType != m3u8.MASTER {
+		return errors.New("error not valid m3u8.MASTER file")
+	}
+	masterPlaylist := playlist.(*m3u8.MasterPlaylist)
+	//log.Printf("LIVE: %s - found %d variants", username, len(masterPlaylist.Variants))
+	//for idx, variant := range masterPlaylist.Variants {
+	//	log.Printf("%d - %s - %s", idx, variant.Resolution, variant.URI)
+	//}
+	if len(masterPlaylist.Variants) < 1 {
+		return errors.New("no valid playlists for the stream found")
+	}
+	return nil
 
 }
