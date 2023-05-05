@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"../models"
 	"encoding/json"
+	"github.com/goldbattle/twitch_vods/models"
 	"io/ioutil"
 	"log"
 )

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"./algos"
-	"./helpers"
-	"./models"
-	"./twitch"
 	"errors"
+	"github.com/goldbattle/twitch_vods/algos"
+	"github.com/goldbattle/twitch_vods/helpers"
+	"github.com/goldbattle/twitch_vods/models"
+	"github.com/goldbattle/twitch_vods/twitch"
 	"github.com/nicklaw5/helix"
 	"log"
 	"os"

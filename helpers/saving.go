@@ -1,9 +1,9 @@
 package helpers
 
 import (
-	"../models"
 	"encoding/json"
 	"fmt"
+	"github.com/goldbattle/twitch_vods/models"
 	"github.com/nicklaw5/helix"
 	"io/ioutil"
 	"log"

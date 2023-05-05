@@ -1,10 +1,10 @@
 package algos
 
 import (
-	"../helpers"
-	"../models"
-	"../twitch"
 	"encoding/json"
+	"github.com/goldbattle/twitch_vods/helpers"
+	"github.com/goldbattle/twitch_vods/models"
+	"github.com/goldbattle/twitch_vods/twitch"
 	"github.com/nicklaw5/helix"
 	"io/ioutil"
 	"log"

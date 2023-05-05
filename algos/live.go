@@ -1,12 +1,12 @@
 package algos
 
 import (
-	"../models"
-	"../twitch"
 	"bufio"
 	"encoding/json"
 	"fmt"
 	twitchirc "github.com/gempir/go-twitch-irc"
+	"github.com/goldbattle/twitch_vods/models"
+	"github.com/goldbattle/twitch_vods/twitch"
 	"github.com/nicklaw5/helix"
 	"io/ioutil"
 	"log"
