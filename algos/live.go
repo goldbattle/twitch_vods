@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	twitchirc "github.com/gempir/go-twitch-irc"
+	twitchirc "github.com/gempir/go-twitch-irc/v3"
 	"github.com/goldbattle/twitch_vods/models"
 	"github.com/goldbattle/twitch_vods/twitch"
 	"github.com/nicklaw5/helix"
