@@ -364,7 +364,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 
 	// Open our streamlink!
 	cmd := exec.Command(config.Streamlink, "twitch.tv/"+username, "best", "--loglevel",
-		"debug", "-o", pathVideoTmp, "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns")
+		"debug", "-o", pathVideoTmp, "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns", "--twitch-ttvlol", "--twitch-proxy-playlist-fallback")
 	cmd.Stdout = logfileWriter
 	cmd.Stdout = logfileWriter
 	err = cmd.Start()
