@@ -1,10 +1,10 @@
 package twitch
 
 import (
-	"../models"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/goldbattle/twitch_vods/models"
 	"github.com/grafov/m3u8"
 	"github.com/nicklaw5/helix"
 	"io/ioutil"
