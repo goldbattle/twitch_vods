@@ -32,7 +32,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 	//err1 := twitch.TestIfStreamIsLiveM3U8(username)
 	stream, err := twitch.GetLatestStream(client, usernameId)
 	if err != nil {
-		log.Printf("LIVE: %s - %s | %s\n", username, err)
+		log.Printf("LIVE: %s - %s\n", username, err)
 		return
 	}
 
