@@ -1,5 +1,5 @@
-github.com/gempir/go-twitch-irc/v3 v3.3.0 h1:iBOKSwNbgsE/zYwzyoHNhXBlf/kkzl3V3k6H2myENRU=
-github.com/gempir/go-twitch-irc/v3 v3.3.0/go.mod h1:/W9KZIiyizVecp4PEb7kc4AlIyXKiCmvlXrzlpPUytU=
+github.com/gempir/go-twitch-irc/v4 v4.0.0 h1:sHVIvbWOv9nHXGEErilclxASv0AaQEr/r/f9C0B9aO8=
+github.com/gempir/go-twitch-irc/v4 v4.0.0/go.mod h1:QsOMMAk470uxQ7EYD9GJBGAVqM/jDrXBNbuePfTauzg=
 github.com/golang-jwt/jwt v3.2.1+incompatible h1:73Z+4BJcrTC+KczS6WvTPvRGOp1WmfEP4Q1lOd9Z/+c=
 github.com/golang-jwt/jwt v3.2.1+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
 github.com/grafov/m3u8 v0.12.0 h1:T6iTwTsSEtMcwkayef+FJO8kj+Sglr4Lh81Zj8Ked/4=

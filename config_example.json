@@ -20,6 +20,16 @@
   "channels_live": [
     "sodapoppin"
   ],
+  "channels_live_chat": [
+    "moonmoon"
+  ],
+  "streamlink_options": [
+    "--twitch-disable-hosting",
+    "--twitch-disable-ads",
+    "--twitch-disable-reruns",
+    "--twitch-ttvlol",
+    "--twitch-proxy-playlist-fallback"
+  ],
   "query_vods_min": 15,
   "query_live_min": 1
 }

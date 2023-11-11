@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	twitchirc "github.com/gempir/go-twitch-irc/v3"
+	twitchirc "github.com/gempir/go-twitch-irc/v4"
 	"github.com/goldbattle/twitch_vods/models"
 	"github.com/goldbattle/twitch_vods/twitch"
 	"github.com/nicklaw5/helix"
@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
+func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernameId string, downloadVideo bool, config models.ConfigurationFile) {
 
 	// Our data structures
 	stream := helix.Stream{}
@@ -177,6 +177,7 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 		if len(message.User.Color) > 0 {
 			comment.Message.UserColor = &message.User.Color
 		}
+		//isSubscribe := strings.Contains(message.Message, "subscribed")
 
 		// Loop through all user badges (sub, mod, etc..)
 		for id, ver := range message.User.Badges {
@@ -363,8 +364,13 @@ func DownloadStreamLiveStreamLink(client *helix.Client, username string, usernam
 	}()
 
 	// Open our streamlink!
-	cmd := exec.Command(config.Streamlink, "twitch.tv/"+username, "best", "--loglevel",
-		"debug", "-o", pathVideoTmp, "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns", "--twitch-ttvlol", "--twitch-proxy-playlist-fallback")
+	quality := "best"
+	if !downloadVideo {
+		quality = "worst"
+	}
+	args := append([]string{"twitch.tv/" + username, quality, "--loglevel", "info", "-o", pathVideoTmp}, config.StreamLinkOptions...)
+	fmt.Printf("%s %s\n", config.Streamlink, strings.Join(args, " "))
+	cmd := exec.Command(config.Streamlink, args...)
 	cmd.Stdout = logfileWriter
 	cmd.Stdout = logfileWriter
 	err = cmd.Start()

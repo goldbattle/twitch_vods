@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -45,7 +46,9 @@ func main() {
 	}
 
 	// Get the user ids for this user
+	var usernames []string
 	var usernameIds []string
+	var shouldDownloadVideo []bool
 	for _, username := range config.ChannelsLive {
 		user := helix.User{}
 		err := errors.New("startup")
@@ -57,7 +60,35 @@ func main() {
 				log.Printf("CLIENT: user %s -> %s\n", username, user.ID)
 			}
 		}
+		usernames = append(usernames, username)
 		usernameIds = append(usernameIds, user.ID)
+		shouldDownloadVideo = append(shouldDownloadVideo, true)
+	}
+	for _, username := range config.ChannelsLiveChat {
+		// Check to see if we are already recording the video+chat
+		found := false
+		for _, usernameLive := range config.ChannelsLive {
+			if strings.Contains(usernameLive, username) {
+				found = true
+			}
+		}
+		if found {
+			continue
+		}
+		// Else this is an additional user, so append it
+		user := helix.User{}
+		err := errors.New("startup")
+		for err != nil {
+			user, err = twitch.GetUser(client, username)
+			if err != nil {
+				log.Printf("ERROR: %s\n", err)
+			} else {
+				log.Printf("CLIENT: user %s -> %s\n", username, user.ID)
+			}
+		}
+		usernames = append(usernames, username)
+		usernameIds = append(usernameIds, user.ID)
+		shouldDownloadVideo = append(shouldDownloadVideo, false)
 	}
 
 	// Create a listener for the sigterm to close our threads
@@ -74,16 +105,16 @@ func main() {
 	var wg sync.WaitGroup
 	for i := range usernameIds {
 		wg.Add(1)
-		go func(client *helix.Client, username string, usernameId string, config models.ConfigurationFile) {
+		go func(client *helix.Client, username string, usernameId string, downloadVideo bool, config models.ConfigurationFile) {
 			defer wg.Done()
 			for !gracefullSigterm {
 				//algos.DownloadStreamLive(client, username, usernameId, config)
-				algos.DownloadStreamLiveStreamLink(client, username, usernameId, config)
+				algos.DownloadStreamLiveStreamLink(client, username, usernameId, downloadVideo, config)
 				if !gracefullSigterm {
 					time.Sleep(time.Duration(config.QueryLiveMin) * time.Minute)
 				}
 			}
-		}(client, config.ChannelsLive[i], usernameIds[i], config)
+		}(client, usernames[i], usernameIds[i], shouldDownloadVideo[i], config)
 	}
 
 	// Wait for all to complete
