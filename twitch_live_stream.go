@@ -41,7 +41,7 @@ func main() {
 	<-waitForFirstAppAccessToken
 
 	// Ensure we have channels
-	if len(config.ChannelsLive) < 1 {
+	if len(config.ChannelsLive) < 1 && len(config.ChannelsLiveChat) < 1 {
 		log.Fatalf("CONFIG: please specify at least one chat channel to watch\n")
 	}
 
