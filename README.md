@@ -20,7 +20,7 @@ This should always happen unless the streamer has disabled their VODs.
 As a fallback then the stream ID should be used, which is a distinct number.
 
 Streamlink recording is then started with any user specified commands.
-If you have Twitch Prime, then an Oauth token can be [specified](https://streamlink.github.io/cli/plugins/twitch.html#authentication) which should remove all ads in the video stream.
+If you have Twitch Turbo, then an Oauth token can be [specified](https://streamlink.github.io/cli/plugins/twitch.html#authentication) which should remove all ads in the video stream.
 This is pretty much necessary as there is no way to remove the embedded ads via streamlink, just to remove them from the save file which breaks continuity.
 
 ```json
